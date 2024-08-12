@@ -1,0 +1,17 @@
+debug_mode = true
+host = "localhost"
+port = 8080
+
+[database]
+  # Chose between 'sqlite' and 'mysql'
+  type = "sqlite"
+  database_file_name = "test.db"
+  
+  # MySQL connection
+  # user = "mysql_user"
+  # db_host = "localhost"
+  # db_name = "my_database"
+  # db_port = 3306
+  # password = "mysql_password"
+[jwt]
+  secret = "your-secret-key"

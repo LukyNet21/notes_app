@@ -1,0 +1,55 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout>
+    <h1 id="welcome" class="text-3xl font-bold mb-6">Welcome</h1>
+
+    <h2 class="text-2xl font-semibold mb-4">Your Notes</h2>
+    <div
+        id="notes"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+    >
+        <!-- Placeholder notes -->
+        <div class="bg-white dark:bg-gray-800 p-4 rounded shadow">
+            <h3 class="text-xl font-bold">Note 1</h3>
+            <p class="text-gray-700 dark:text-gray-300">
+                This is a placeholder for a user note.
+            </p>
+        </div>
+        <div class="bg-white dark:bg-gray-800 p-4 rounded shadow">
+            <h3 class="text-xl font-bold">Note 2</h3>
+            <p class="text-gray-700 dark:text-gray-300">
+                This is another placeholder for a user note.
+            </p>
+        </div>
+    </div>
+</BaseLayout>
+
+<script>
+    window.addEventListener("load", (event) => {
+        fetch("http://localhost:8080/getUser", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            credentials: "include",
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    // Redirect if the response status is not OK
+                    window.location.replace("/auth/login");
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
+            .then((data) => {
+                console.log("Success:", data);
+                document.getElementById("welcome").innerHTML =
+                    "Welcome " + data.firstname + " " + data.lastname;
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+            });
+    });
+</script>
