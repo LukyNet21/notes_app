@@ -1,6 +1,6 @@
 window.addEventListener("load", (event) => {
     fetch('http://localhost:8080/isTokenValid', {
-        method: 'POST',
+        method: 'GET',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
         },

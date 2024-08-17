@@ -7,4 +7,5 @@ type User struct {
 	FirstName string `json:"firstname"`
 	LastName  string `json:"lastname"`
 	Password  string `json:"password" gorm:"unique;not null"`
+	Notes     []Note
 }

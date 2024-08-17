@@ -32,5 +32,5 @@ func Connect() {
 		panic("invalid database config")
 	}
 
-	DB.AutoMigrate(&models.User{})
+	DB.AutoMigrate(&models.User{}, &models.Note{})
 }

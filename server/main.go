@@ -21,13 +21,12 @@ func main() {
 	database.Connect()
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:4321"}, // Update this with your frontend's URL
+		AllowedOrigins:   []string{"http://localhost:4321"},
 		AllowCredentials: true,
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
 		AllowedHeaders:   []string{"Authorization", "Content-Type"},
 	})
 
-	// Wrap the router with the CORS middleware
 	handler := c.Handler(r)
 
 	fmt.Printf("Starting server on http://%s:%d.\n", config.Host, config.Port)

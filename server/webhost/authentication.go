@@ -2,7 +2,6 @@ package webhost
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"notes_server/config"
 	"notes_server/database"
@@ -26,7 +25,7 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 		Username:  r.PostFormValue("username"),
 		Email:     r.PostFormValue("email"),
 		FirstName: r.PostFormValue("firstName"),
-		LastName:  r.PostFormValue("lsatName"),
+		LastName:  r.PostFormValue("lastName"),
 		Password:  r.PostFormValue("password"),
 	}
 
@@ -93,7 +92,6 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 
 	token, err := claims.SignedString([]byte(config.JWT.Secret))
 	if err != nil {
-		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode("Could not login")
 		return
@@ -115,25 +113,8 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func isJWTVaidHandler(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("jwt")
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode("Could not find JWT cookie.")
-		return
-	}
-
-	token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
-		return []byte(config.JWT.Secret), nil
-	})
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode("Could not parse JWT.")
-		return
-	}
-
-	if !token.Valid {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode("Invalid token")
+	user := extractUser(w, r)
+	if user == nil {
 		return
 	}
 

@@ -3,50 +3,126 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
 <BaseLayout>
-    <h1 id="welcome" class="text-3xl font-bold mb-6">Welcome</h1>
-
-    <h2 class="text-2xl font-semibold mb-4">Your Notes</h2>
-    <div
-        id="notes"
-        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-    >
-        <!-- Placeholder notes -->
-        <div class="bg-white dark:bg-gray-800 p-4 rounded shadow">
-            <h3 class="text-xl font-bold">Note 1</h3>
-            <p class="text-gray-700 dark:text-gray-300">
-                This is a placeholder for a user note.
-            </p>
+    <div class="max-w-6xl mx-auto">
+        <h1 id="welcome" class="text-3xl font-bold mb-6 text-center">
+            Welcome
+        </h1>
+        <div class="flex justify-between mb-6">
+            <h2 class="text-2xl font-semibold mb-4">Your Notes</h2>
+            <button
+                type="button"
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold mt-2 py-2 px-4 rounded"
+                onclick="document.getElementById('newNote').showModal()"
+                >New note</button
+            >
         </div>
-        <div class="bg-white dark:bg-gray-800 p-4 rounded shadow">
-            <h3 class="text-xl font-bold">Note 2</h3>
-            <p class="text-gray-700 dark:text-gray-300">
-                This is another placeholder for a user note.
-            </p>
+        <div
+            id="notes"
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+        >
         </div>
+        <dialog id="newNote" class="bg-slate-900 p-6">
+            <form
+                action="http://localhost:8080/createNote"
+                method="post"
+                id="newNote"
+            >
+                <div class="mb-4">
+                    <label
+                        for="name"
+                        class="block text-gray-700 dark:text-gray-300 font-semibold mb-2"
+                        >Username</label
+                    >
+                    <input
+                        type="text"
+                        name="name"
+                        id="name"
+                        placeholder="Note Name"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring focus:border-blue-300 dark:focus:border-blue-500"
+                    />
+                </div>
+                <button
+                    type="submit"
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold mt-2 py-2 px-4 rounded"
+                    >Create</button
+                >
+                <button
+                    type="button"
+                    class="bg-red-500 hover:bg-red-700 text-white font-bold mt-2 py-2 px-4 rounded"
+                    onclick="document.getElementById('newNote').close()"
+                    >Cancel</button
+                >
+            </form>
+        </dialog>
     </div>
 </BaseLayout>
 
 <script>
-    window.addEventListener("load", (event) => {
-        fetch("http://localhost:8080/getUser", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-            credentials: "include",
+    fetch("http://localhost:8080/getUser", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        credentials: "include",
+    })
+        .then((response) => {
+            if (!response.ok) {
+                window.location.replace("/auth/login");
+                throw new Error("Network response was not ok");
+            }
+            return response.json();
         })
-            .then((response) => {
-                if (!response.ok) {
-                    // Redirect if the response status is not OK
-                    window.location.replace("/auth/login");
-                    throw new Error("Network response was not ok");
-                }
-                return response.json();
-            })
+        .then((data) => {
+            console.log("Success:", data);
+            document.getElementById("welcome").innerHTML =
+                "Welcome " + data.firstname + " " + data.lastname;
+        })
+        .catch((error) => {
+            console.error("Error:", error);
+        });
+
+    fetch("http://localhost:8080/getNotes", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        credentials: "include",
+    })
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            var noteSection = document.getElementById("notes");
+
+            data.forEach((element) => {
+                var ih = noteSection?.innerHTML;
+                noteSection.innerHTML =
+                    ih +
+                    `<div class="bg-white dark:bg-gray-800 p-4 rounded shadow">
+                    <h3 class="text-xl font-bold">${element.note_name}</h3>
+                    <a href="/edit?id=${element.id}"><button type="button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold mt-2 py-2 px-4 rounded">Edit Note</button></a>
+                </div>`;
+            });
+            console.log("Success:", data);
+        })
+        .catch((error) => {
+            console.error("Error:", error);
+        });
+
+    document.getElementById("newNote")?.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        fetch("http://localhost:8080/createNote", {
+            method: "POST",
+            credentials: "include",
+            body: JSON.stringify({
+                "note_name": formData.get("name"),
+            }),
+        })
+            .then((response) => response.json())
             .then((data) => {
+                window.location.replace(`/edit?id=${data}`)
                 console.log("Success:", data);
-                document.getElementById("welcome").innerHTML =
-                    "Welcome " + data.firstname + " " + data.lastname;
             })
             .catch((error) => {
                 console.error("Error:", error);
