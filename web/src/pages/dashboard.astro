@@ -31,7 +31,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
                     <label
                         for="name"
                         class="block text-gray-700 dark:text-gray-300 font-semibold mb-2"
-                        >Username</label
+                        >Note Name</label
                     >
                     <input
                         type="text"
@@ -94,14 +94,37 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         .then((data) => {
             var noteSection = document.getElementById("notes");
 
-            data.forEach((element) => {
+            data.forEach((note) => {
                 var ih = noteSection?.innerHTML;
                 noteSection.innerHTML =
                     ih +
                     `<div class="bg-white dark:bg-gray-800 p-4 rounded shadow">
-                    <h3 class="text-xl font-bold">${element.note_name}</h3>
-                    <a href="/edit?id=${element.id}"><button type="button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold mt-2 py-2 px-4 rounded">Edit Note</button></a>
-                </div>`;
+                        <h3 class="text-xl font-bold">${note.note_name}</h3>
+                        <a href="/edit?id=${note.id}"><button type="button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold mt-2 py-2 px-4 rounded">Edit Note</button></a>
+                        <button type="button" class="bg-red-500 hover:bg-red-700 text-white font-bold mt-2 py-2 px-4 rounded" onclick="document.getElementById('deleteNote${note.id}').showModal()">Delete Note</button>
+                        <dialog id="deleteNote${note.id}" class="bg-slate-900 p-6">
+                            <h3 class="text-white">Delete ${note.note_name}</h3> 
+                            <button
+                                type="button"
+                                class="bg-red-500 hover:bg-red-700 text-white font-bold mt-2 py-2 px-4 rounded"
+                                id="deleteNoteBtn${note.id}"
+                                >Delete</button
+                            >
+                            <button
+                                type="button"
+                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold mt-2 py-2 px-4 rounded"
+                                onclick="document.getElementById('deleteNote${note.id}').close()"
+                                >Cancel</button
+                            >    
+                        </dialog>
+                    </div>`;
+                document.getElementById(`deleteNote${note.id}`)?.addEventListener("click", e => {
+                    fetch(`http://localhost:8080/deleteNote/${note.id}`, {
+                        method: "DELETE",
+                        credentials: "include"
+                    }).then(() => location.reload())
+                    
+                })
             });
             console.log("Success:", data);
         })

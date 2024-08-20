@@ -122,3 +122,20 @@ func updateNoteHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(note)
 }
+
+func deleteNoteHandler(w http.ResponseWriter, r *http.Request) {
+	user := extractUser(w, r)
+	if user == nil {
+		return
+	}
+
+	noteIDStr := mux.Vars(r)["id"]
+	noteID, err := strconv.Atoi(noteIDStr)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode("Invalid note ID.")
+		return
+	}
+
+	database.DB.Delete(&models.Note{}, noteID)
+}

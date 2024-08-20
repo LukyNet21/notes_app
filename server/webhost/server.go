@@ -11,4 +11,6 @@ func SetupRoutes(r *mux.Router) {
 	r.HandleFunc("/getNotes", getNotesHandler).Methods("GET")
 	r.HandleFunc("/getNoteByID/{id}", getNoteByIDHandler).Methods("GET")
 	r.HandleFunc("/updateNote/{id}", updateNoteHandler).Methods("PUT")
+	r.HandleFunc("/deleteNote/{id}", deleteNoteHandler).Methods("DELETE")
+
 }
