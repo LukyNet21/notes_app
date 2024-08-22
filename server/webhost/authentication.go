@@ -10,6 +10,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 func registerHandler(w http.ResponseWriter, r *http.Request) {
@@ -43,7 +44,12 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user.Password = string(password)
-	database.DB.Create(&user)
+	err = database.DB.Create(&user).Error
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode("User already exists")
+		return
+	}
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode("User successfully created")
 }
@@ -68,15 +74,15 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 
 	var user models.User
 
-	database.DB.Where("username = ?", username).First(&user)
+	err := database.DB.Where("username = ?", username).First(&user).Error
 
-	if user.ID == 0 {
+	if user.ID == 0 || err == gorm.ErrRecordNotFound {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode("User not fount")
+		json.NewEncoder(w).Encode("User not found")
 		return
 	}
 
-	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode("Invalid password")

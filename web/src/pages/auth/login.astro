@@ -7,6 +7,8 @@ import BaseLayout from "../../layouts/BaseLayout.astro"
         <form id="login" action="http://localhost:8080/login" method="post" class="bg-white dark:bg-gray-800 dark:text-white p-6 rounded-lg shadow-md w-full max-w-sm">
             <h2 class="text-2xl font-bold mb-6 text-center">Login</h2>
 
+            <div id="error-message" class="text-red-600 mb-4 hidden"></div>
+
             <div class="mb-4">
                 <label for="username" class="block text-gray-700 dark:text-gray-300 font-semibold mb-2">Username</label>
                 <input type="text" name="username" id="username" value="uname" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring focus:border-blue-300 dark:focus:border-blue-500">
@@ -35,6 +37,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro"
             event.preventDefault();
 
             const formData = new FormData(event.target);
+            const errorMessageDiv = document.getElementById('error-message'); 
 
             fetch('http://localhost:8080/login', {
                 method: 'POST',
@@ -44,13 +47,22 @@ import BaseLayout from "../../layouts/BaseLayout.astro"
                 body: new URLSearchParams(formData),
                 credentials: 'include'
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok){
+                    return response.text().then(text => { 
+                        throw new Error(text || "Error while creating user");
+                    });
+                }
+                return response.json()
+            })
             .then(data => {
                 console.log('Success:', data);
                 window.location.href = "/dashboard"
             })
             .catch((error) => {
                 console.error('Error:', error);
+                errorMessageDiv.textContent = error.message;
+                errorMessageDiv.classList.remove('hidden');
             });
         });
     </script>

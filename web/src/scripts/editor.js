@@ -99,6 +99,9 @@ document.getElementById("saveButton").addEventListener("click", () => {
                 "note_content": JSON.stringify(outputData)
             })
         })
+    }).then(() => {
+        document.getElementById("changesSaved").showModal()
+        setTimeout(() => {document.getElementById("changesSaved").close()}, 1000)
     })
         .catch((error) => {
             console.log('Saving failed: ', error)
